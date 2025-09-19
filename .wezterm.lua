@@ -1,7 +1,17 @@
 local wezterm = require("wezterm")
 local config = wezterm.config_builder()
 config.window_close_confirmation = "NeverPrompt"
-config.color_scheme = "Catppuccin Mocha"
+
+local function theme_switch(appearance)
+	if appearance:find("Dark") then
+		return "Catppuccin Mocha"
+	else
+		return "Catppuccin Latte"
+	end
+end
+
+config.color_scheme = theme_switch(wezterm.gui.get_appearance())
+
 local mux = wezterm.mux
 wezterm.on("gui-startup", function(cmd)
 	local _, _, window = mux.spawn_window(cmd or {})
@@ -30,6 +40,13 @@ if os_type == "x86_64-pc-windows-msvc" then
 end
 
 config.window_frame = { active_titlebar_bg = "none" }
-config.tab_bar_at_bottom = true
+config.window_decorations = "RESIZE | INTEGRATED_BUTTONS"
+config.integrated_title_button_style = "Windows"
+wezterm.on("format-tab-title", function(tab)
+	return {
+		{ Background = { Color = "transparent" } },
+		{ Text = "[" .. tab.tab_index + 1 .. "] " .. tab.active_pane.title },
+	}
+end)
 
 return config
