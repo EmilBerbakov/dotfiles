@@ -25,7 +25,7 @@ local os_type = wezterm.target_triple
 
 local use_fancy_titlebar = false
 config.use_fancy_tab_bar = use_fancy_titlebar
-config.tab_bar_at_bottom = true
+config.tab_bar_at_bottom = not use_fancy_titlebar
 
 --NOTE: This does not work
 
@@ -35,12 +35,12 @@ function Toggle_Fancy_Titlebar(swap)
 	end
 	use_fancy_titlebar = swap and not use_fancy_titlebar
 	if use_fancy_titlebar then
-		config.window_frame = { active_titlebar_bg = "none" }
+		config.window_frame = { active_titlebar_bg = color_theme.background }
 		config.window_decorations = "RESIZE | INTEGRATED_BUTTONS | TITLE"
 		config.integrated_title_button_style = "Windows"
 		wezterm.on("format-tab-title", function(tab)
 			return {
-				{ Background = { Color = "transparent" } },
+				{ Background = { Color = color_theme.background } },
 				{ Text = "[" .. tab.tab_index + 1 .. "] " .. tab.active_pane.title },
 			}
 		end)
@@ -70,6 +70,21 @@ config.keys = {
 		action = wezterm.action_callback(Toggle_Fancy_Titlebar),
 	},
 }
+
+for i = 1, 9 do
+	table.insert(config.keys, {
+		key = tostring(i),
+		mods = "LEADER",
+		action = wezterm.action.ActivateTab(i - 1),
+	})
+	--NOTE: this isn't actually disabling the ctrl+shift+num default keystrokes...
+
+	-- table.insert(config.keys, {
+	-- 	key = tostring(i),
+	-- 	mods = "CTRL|SHIFT",
+	-- 	action = wezterm.action.DisableDefaultAssignment,
+	-- })
+end
 
 if os_type == "x86_64-pc-windows-msvc" then
 	--	local _, stdout, _ = wezterm.run_child_process({ "cmd.exe", "ver" })
